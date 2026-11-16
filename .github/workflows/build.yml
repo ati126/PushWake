@@ -1,0 +1,46 @@
+name: Build PushWake unsigned IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show installed Xcode
+        run: xcodebuild -version
+      - name: Check available iOS SDKs
+        run: xcodebuild -showsdks
+      - name: Build app for real iPhone (no signing)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project PushWake.xcodeproj \
+            -scheme PushWake \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/PushWakeBuild" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/PushWakeBuild/Build/Products/Release-iphoneos/PushWake.app"
+          test -d "$APP"
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/"
+          cd "$RUNNER_TEMP/ipa"
+          zip -q -r "$GITHUB_WORKSPACE/PushWake-unsigned.ipa" Payload
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: PushWake-unsigned-ipa
+          path: PushWake-unsigned.ipa
+          retention-days: 7
