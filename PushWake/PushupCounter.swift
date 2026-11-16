@@ -42,10 +42,12 @@ struct PushupCounter {
     }
 
     private func elbowAngle(_ pose: VNHumanBodyPoseObservation) -> Double? {
-        for side in [
-            (VNHumanBodyPoseObservation.JointName.leftShoulder, .leftElbow, .leftWrist),
-            (VNHumanBodyPoseObservation.JointName.rightShoulder, .rightElbow, .rightWrist)
-        ] {
+        typealias Joint = VNHumanBodyPoseObservation.JointName
+        let sides: [(Joint, Joint, Joint)] = [
+            (.leftShoulder, .leftElbow, .leftWrist),
+            (.rightShoulder, .rightElbow, .rightWrist)
+        ]
+        for side in sides {
             guard let points = try? pose.recognizedPoints(.all),
                   let s = points[side.0], let e = points[side.1], let w = points[side.2],
                   min(s.confidence, e.confidence, w.confidence) > 0.35 else { continue }
