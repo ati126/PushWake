@@ -46,15 +46,16 @@ final class AlarmController: ObservableObject {
             let schedule = Alarm.Schedule.relative(.init(time: time, repeats: .never))
             let alert = AlarmPresentation.Alert(
                 title: "Zeit für deine Liegestütze!",
-                stopButton: .stopButton,
+                stopButton: AlarmButton(text: "Stoppen", textColor: .white, systemImageName: "stop.circle"),
                 secondaryButton: AlarmButton(text: "Training", textColor: .white, systemImageName: "figure.strengthtraining.traditional"),
                 secondaryButtonBehavior: .custom
             )
             let attributes = AlarmAttributes<EmptyAlarmMetadata>(
                 presentation: AlarmPresentation(alert: alert),
+                metadata: EmptyAlarmMetadata(),
                 tintColor: .green
             )
-            let config = AlarmManager.AlarmConfiguration<EmptyAlarmMetadata>.alarm(
+            let config: AlarmManager.AlarmConfiguration<EmptyAlarmMetadata> = .alarm(
                 schedule: schedule,
                 attributes: attributes,
                 stopIntent: nil,
